@@ -7,3 +7,6 @@
 
 # dependency file for lock pick minigame  
 -https://github.com/Nathan-FiveM/qb-lock
+
+# Preview 
+https://i.imgur.com/sWy29dB.jpeg
