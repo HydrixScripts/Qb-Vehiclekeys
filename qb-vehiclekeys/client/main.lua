@@ -370,34 +370,38 @@ function LockpickDoor(isAdvanced)
     end
 end
 
+--new method
 function lockpickFinish(success)
-    local ped = PlayerPedId()
-    local pos = GetEntityCoords(ped)
-    local vehicle = QBCore.Functions.GetClosestVehicle(pos)
+    local vehicle = QBCore.Functions.GetClosestVehicle()
+
     local chance = math.random()
-    StopAnimTask(PlayerPedId(), "veh@break_in@0h@p_m_one@", "low_force_entry_ds", 1.0)
     if success then
         TriggerServerEvent('hud:server:GainStress', math.random(1, 4))
-        QBCore.Functions.Notify('Opened Door!', 'success')
-        SetVehicleDoorsLocked(vehicle, 1)
-        lockpicked = true
-        lockpickedPlate = QBCore.Functions.GetPlate(vehicle)
+        lastPickedVehicle = vehicle
+
+        if GetPedInVehicleSeat(vehicle, -1) == PlayerPedId() then
+            TriggerServerEvent('qb-vehiclekeys:server:AcquireVehicleKeys', QBCore.Functions.GetPlate(vehicle))
+        else
+            QBCore.Functions.Notify('You managed to pick the door lock open!', 'success')
+            SetVehicleDoorsLocked(vehicle, 1)
+        end
+
     else
-        PoliceCall()
         TriggerServerEvent('hud:server:GainStress', math.random(1, 4))
+        AttemptPoliceAlert("steal")
     end
+
     if usingAdvanced then
         if chance <= Config.RemoveLockpickAdvanced then
-            TriggerEvent('inventory:client:ItemBox', QBCore.Shared.Items["advancedlockpick"], "remove")
-            TriggerServerEvent("QBCore:Server:RemoveItem", "advancedlockpick", 1)
+            TriggerServerEvent("qb-vehiclekeys:server:breakLockpick", "advancedlockpick")
         end
     else
         if chance <= Config.RemoveLockpickNormal then
-            TriggerEvent('inventory:client:ItemBox', QBCore.Shared.Items["lockpick"], "remove")
-            TriggerServerEvent("QBCore:Server:RemoveItem", "lockpick", 1)
+            TriggerServerEvent("qb-vehiclekeys:server:breakLockpick", "lockpick")
         end
     end
 end
+
 
 function Hotwire(vehicle, plate)
     local hotwireTime = math.random(Config.minHotwireTime, Config.maxHotwireTime)
