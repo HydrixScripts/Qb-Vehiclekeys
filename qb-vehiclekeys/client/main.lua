@@ -106,6 +106,55 @@ CreateThread(function()
     end
 end)
 
+function LockpickIgnition(isAdvanced)
+    if not HasKey then 
+        local ped = PlayerPedId()
+        local vehicle = GetVehiclePedIsIn(ped, true)
+        if vehicle ~= nil and vehicle ~= 0 then
+            if GetPedInVehicleSeat(vehicle, -1) == ped then
+                IsHotwiring = true
+                PoliceCall()
+
+                local dict = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@"
+
+                usingAdvanced = isAdvanced
+                RequestAnimDict(dict)
+                while not HasAnimDictLoaded(dict) do
+                    RequestAnimDict(dict)
+                    Citizen.Wait(100)
+                end
+                if usingAdvanced then
+					local seconds = math.random(9,12)
+					local circles = math.random(1,3)
+					local success = exports['qb-lock']:StartLockPickCircle(circles, seconds, success)
+					if success then
+						StopAnimTask(ped, dict, "machinic_loop_mechandplayer", 1.0)
+						QBCore.Functions.Notify("Lockpicking succeeded!")
+						HasKey = true
+						TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(vehicle))
+						IsHotwiring = false
+					else
+						QBCore.Functions.Notify("Lockpicking failed!", "error")
+					end
+				else
+                    local seconds = math.random(7,10)
+					local circles = math.random(2,4)
+					local success = exports['qb-lock']:StartLockPickCircle(circles, seconds, success)
+					if success then
+						StopAnimTask(ped, dict, "machinic_loop_mechandplayer", 1.0)
+						QBCore.Functions.Notify("Lockpicking succeeded!")
+						HasKey = true
+						TriggerEvent("vehiclekeys:client:SetOwner", GetVehicleNumberPlateText(vehicle))
+						IsHotwiring = false
+					else
+						QBCore.Functions.Notify("Lockpicking failed!", "error")
+					end
+                end
+            end
+        end
+    end
+end
+
 function isBlacklistedVehicle(vehicle)
     local isBlacklisted = false
     for _,v in ipairs(Config.NoLockVehicles) do
